@@ -4,7 +4,7 @@ Deep Learning solution to detect road anomalies (e.g., potholes, debris) using d
 # **Resources** : 
 
 ## **A. Data Sets** :
-  1. https://www.kaggle.com/datasets/rohitsuresh15/radroad-anomaly-detection/data
+  1. https://www.kaggle.com/datasets/rohitsuresh15/radroad-anomaly-detection/data (First one will be used in this week)
   2. https://www.kaggle.com/datasets/sarfaraznatha/road-anomaly-dataset
   3. https://www.kaggle.com/datasets/rohitsuresh15/radroad-anomaly-detection/data
   4. https://www.epfl.ch/labs/cvlab/data/road-anomaly/
