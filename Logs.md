@@ -14,3 +14,8 @@ Deep Learning solution to detect road anomalies (e.g., potholes, debris) using d
 
 ## **B. Related Work**:
   1. I will embed tomorrow related (Research papers , other's contributin)
+
+## **C. Parameters**:
+"As the files can't be uploaded to GitHub due to their large size, I will upload them to Google Drive." 
+Here is the link : 
+https://drive.google.com/drive/folders/15KXL9ucK9jzRPGsk8myPzvKKpEGtrtkG?usp=sharing
