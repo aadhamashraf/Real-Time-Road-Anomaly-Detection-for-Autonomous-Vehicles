@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -130,9 +130,9 @@
             transition: width 0.3s ease;
         }
 
-        .video-grid {
+        .video-comparison {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 2rem;
             margin-top: 2rem;
         }
@@ -156,6 +156,12 @@
 
         .video-card-content {
             padding: 1rem;
+        }
+
+        .video-card-title {
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: var(--text);
         }
 
         .download-btn {
@@ -189,16 +195,35 @@
                 font-size: 2rem;
             }
 
-            .video-grid {
+            .video-comparison {
                 grid-template-columns: 1fr;
             }
+        }
+
+        .error-message {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>Road Anomaly Detection</h1>
+            <h1>Real-Time Road Anomaly Detection for Autonomous Vehicles</h1>
             <p>Upload your videos for automatic anomaly detection processing</p>
         </header>
 
@@ -206,12 +231,10 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
-            <h3>Drag & Drop your videos here</h3>
-            <p>or click to browse your files</p>
-            <form id="uploadForm" enctype="multipart/form-data">
-                <input type="file" id="fileInput" class="file-input" name="files" multiple accept="video/*" required>
-                <button type="button" class="upload-btn" id="browseBtn">Browse Files</button>
-            </form>
+            <h3>Drag & Drop your video here</h3>
+            <p>or</p>
+            <button type="button" class="upload-btn" id="browseBtn">Browse Files</button>
+            <input type="file" class="file-input" id="fileInput" name="files" accept="video/*" required>
         </div>
 
         <div class="progress-container" id="progressContainer">
@@ -220,9 +243,14 @@
                 <div class="progress-bar-fill" id="progressBar"></div>
             </div>
             <p id="progressText">0% Complete</p>
+            <button type="button" class="upload-btn" id="resetBtn" style="display: none;">Reset</button>
         </div>
 
-        <div class="video-grid" id="videoContainer"></div>
+        <div class="success-message" id="successMessage" style="display: none;">
+            <p>Processing completed successfully!</p>
+        </div>
+
+        <div class="video-comparison" id="videoContainer"></div>
     </div>
 
     <script>
@@ -233,8 +261,9 @@
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
         const videoContainer = document.getElementById('videoContainer');
+        const resetBtn = document.getElementById('resetBtn');
+        const successMessage = document.getElementById('successMessage');
 
-        // Handle drag and drop events
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
             document.body.addEventListener(eventName, preventDefaults, false);
@@ -246,49 +275,85 @@
         }
 
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, highlight, false);
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragging'), false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, unhighlight, false);
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragging'), false);
         });
 
-        function highlight() {
-            dropZone.classList.add('dragging');
-        }
-
-        function unhighlight() {
-            dropZone.classList.remove('dragging');
-        }
-
-        dropZone.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
+        dropZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
             handleFiles(files);
-        }
-
-        browseBtn.addEventListener('click', () => {
-            fileInput.click();
         });
 
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-        });
+        browseBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
         function handleFiles(files) {
-            const formData = new FormData();
-            Array.from(files).forEach(file => {
-                formData.append('files', file);
-            });
+            if (files.length === 0) return;
 
-            uploadFiles(formData);
+            const file = files[0]; 
+            const formData = new FormData();
+            formData.append('files', file);
+
+            videoContainer.innerHTML = '';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0% Complete';
+            progressContainer.style.display = 'block';
+            resetBtn.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            const originalVideoCard = createVideoCard(file, 'Original Video');
+            videoContainer.appendChild(originalVideoCard);
+
+            const processedVideoCard = createVideoCard(null, 'Processed Video');
+            videoContainer.appendChild(processedVideoCard);
+
+            uploadFile(formData);
         }
 
-        function uploadFiles(formData) {
-            progressContainer.style.display = 'block';
-            
+        function createVideoCard(file, title) {
+            const videoCard = document.createElement('div');
+            videoCard.className = 'video-card';
+
+            const video = document.createElement('video');
+            video.controls = true;
+
+            if (file) {
+                video.src = URL.createObjectURL(file);
+            }
+
+            const content = document.createElement('div');
+            content.className = 'video-card-content';
+
+            const titleElement = document.createElement('h3');
+            titleElement.className = 'video-card-title';
+            titleElement.textContent = title;
+
+            content.appendChild(titleElement);
+
+            if (file) {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(file);
+                downloadLink.className = 'download-btn';
+                downloadLink.download = file.name;
+                downloadLink.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download Video
+                `;
+                content.appendChild(downloadLink);
+            }
+
+            videoCard.appendChild(video);
+            videoCard.appendChild(content);
+
+            return videoCard;
+        }
+
+        function uploadFile(formData) {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/upload', true);
 
@@ -304,43 +369,68 @@
                 if (xhr.status === 200) {
                     const response = JSON.parse(xhr.responseText);
                     progressContainer.style.display = 'none';
-                    
-                    response.filenames.forEach(filename => {
-                        const videoUrl = '/processed_video/' + filename;
-                        
-                        const videoCard = document.createElement('div');
-                        videoCard.className = 'video-card';
-                        
-                        const video = document.createElement('video');
-                        video.controls = true;
-                        video.src = videoUrl;
-                        
-                        const content = document.createElement('div');
-                        content.className = 'video-card-content';
-                        
+
+                    if (response.filenames && response.filenames.length > 0) {
+
+                        const processedVideo = videoContainer.children[1].querySelector('video');
+                        processedVideo.src = '/processed_video/' + response.filenames[0];
+
+                        const processedContent = videoContainer.children[1].querySelector('.video-card-content');
                         const downloadLink = document.createElement('a');
-                        downloadLink.href = videoUrl;
+                        downloadLink.href = '/processed_video/' + response.filenames[0];
                         downloadLink.className = 'download-btn';
-                        downloadLink.download = filename;
+                        downloadLink.download = 'processed_' + response.filenames[0];
                         downloadLink.innerHTML = `
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                             Download Video
                         `;
-                        
-                        content.appendChild(downloadLink);
-                        videoCard.appendChild(video);
-                        videoCard.appendChild(content);
-                        videoContainer.appendChild(videoCard);
-                    });
+                        processedContent.appendChild(downloadLink);
+
+                        showSuccessMessage();
+                    }
+
+                    resetBtn.style.display = 'block';
+                } else {
+                    showError('Error processing video. Please try again.');
                 }
+            };
+
+            xhr.onerror = function() {
+                showError('Network error occurred. Please try again.');
             };
 
             xhr.send(formData);
         }
+
+        function showError(message) {
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            errorMessage.textContent = message;
+            document.body.appendChild(errorMessage);
+
+            setTimeout(() => {
+                errorMessage.remove();
+            }, 5000);
+        }
+
+        function showSuccessMessage() {
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        resetBtn.addEventListener('click', () => {
+            videoContainer.innerHTML = '';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0% Complete';
+            progressContainer.style.display = 'none';
+            successMessage.style.display = 'none';
+            resetBtn.style.display = 'none';
+            fileInput.value = ''; 
+        });
     </script>
 </body>
-</html> 
-
-
+</html>
