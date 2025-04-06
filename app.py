@@ -10,7 +10,7 @@ app.config['PROCESSED_FOLDER'] = 'processed/'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
 
-model = YOLO('best.pt')  
+model = YOLO("best.pt")  
 
 @app.route('/')
 def index():
