@@ -8,7 +8,16 @@ const progressText = document.getElementById('progressText');
 const videoContainer = document.getElementById('videoContainer');
 const errorMessage = document.getElementById('errorMessage');
 const successToast = document.getElementById('successToast');
-
+const radios = document.querySelectorAll('input[name="choice"]');
+var checked = "";
+radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.checked) {(
+        checked = radio.value);
+        // alert('You selected: ' + radio.value);
+      }
+    });
+  });
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
     dropZone.addEventListener(eventName, preventDefaults, false);
     document.body.addEventListener(eventName, preventDefaults, false);
@@ -86,12 +95,12 @@ function handleFiles(files) {
     videoContainer.innerHTML = '';
     errorMessage.style.display = 'none';
 
-    const originalVideoCard = createVideoCard(file, 'Original Video');
+    const originalVideoCard = createVideoCard(file, 'Original Image');
     videoContainer.appendChild(originalVideoCard);
 
-    const processedVideoCard = createVideoCard(null, 'Processed Video');
+    const processedVideoCard = createVideoCard(null, 'Processed Image');
     videoContainer.appendChild(processedVideoCard);
-
+    formData.append('checked', checked)
     uploadFile(formData);
 }
 
@@ -99,7 +108,7 @@ function createVideoCard(file, title) {
     const videoCard = document.createElement('div');
     videoCard.className = 'video-card';
     
-    const video = document.createElement('video');
+    const video = document.createElement('img');
     video.controls = true;
     
     if (file) {
@@ -124,7 +133,7 @@ function createVideoCard(file, title) {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Download Video
+            Download Image
         `;
         content.appendChild(downloadLink);
     }
@@ -135,6 +144,8 @@ function createVideoCard(file, title) {
 }
 
 function uploadFile(formData) {
+    
+    
     progressContainer.style.display = 'block';
     let progress = 0;
     const duration = 60000; // 60 seconds
@@ -163,7 +174,7 @@ function uploadFile(formData) {
             }, 500);
             
             if (response.filenames && response.filenames.length > 0) {
-                const processedVideo = videoContainer.children[1].querySelector('video');
+                const processedVideo = videoContainer.children[1].querySelector('img');
                 processedVideo.src = '/processed_video/' + response.filenames[0];
                 
                 const processedContent = videoContainer.children[1].querySelector('.video-card-content');
@@ -175,12 +186,12 @@ function uploadFile(formData) {
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Download Video
+                    Download Image
                 `;
                 processedContent.appendChild(downloadLink);
             }
         } else {
-            showError('Error processing video. Please try again.');
+            showError('Error processing image. Please try again.');
             progressContainer.style.display = 'none';
         }
     };
