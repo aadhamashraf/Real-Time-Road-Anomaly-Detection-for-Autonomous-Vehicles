@@ -28,10 +28,13 @@ The `modeling/` directory is crucial as it contains the pre-trained weights that
 
 ## Setup
 
-1.  **Clone the repository** (if applicable) or download the application files.
+1.  **Clone the repository** using:
+   ```bash
+   https://github.com/aadhamashraf/Real-Time-Road-Anomaly-Detection-for-Autonomous-Vehicles.git
+   ```
 2.  **Install Python Dependencies (Optional - if using Docker):** If you are not using Docker, ensure you have Python 3 installed. Install the required Python libraries using pip:
     ```bash
-    pip install Flask opencv-python ultralytics tensorflow keras matplotlib numpy
+    pip install requirements
     ```
 3.  **Ensure Model Weights are Present:** Verify that all the model weight files listed in the `Directory Structure` are present in the `modeling/` directory. You might need to download these separately and place them there.
 
