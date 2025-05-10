@@ -24,26 +24,6 @@ This application is also containerized using Docker for easy deployment and port
 * **Processed Image Display:** The processed image(s) are saved and then displayed back to the user in the web browser.
 * **Dockerized Application:** The application can be easily built and run using Docker, ensuring a consistent environment across different systems.
 
-## Directory Structure
-
-The application structure includes the following key directories:
-
-.
-├── app.py             # Main Flask application file
-├── Dockerfile         # Docker configuration file
-├── Models/            # Directory containing the pre-trained model weights
-│   ├── best_densenet.keras
-│   ├── best_efficientnetb3.keras
-│   ├── best_modelVGG19_fixed5.keras
-│   ├── best_vgg16FineTuned.keras
-│   └── yolov8n.pt
-├── README.md          # This README file
-├── templates/         # Directory for HTML templates
-│   └── index.html
-└── uploads/           # Directory to store uploaded images (created at runtime)
-└── processed/         # Directory to store processed images (created at runtime)
-
-
 The `modeling/` directory is crucial as it contains the pre-trained weights that enable the deep learning models to perform road damage detection. The application code (`app.py`) loads these weights during initialization.
 
 ## Setup
